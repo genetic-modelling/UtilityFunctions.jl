@@ -2,9 +2,35 @@ module UtilityFunctions
 
 # Write your package code here.
 export 
-    count_unique, normalise_unique, shuffle!, has_any_nothing_fields, logistic_growth, normalise,dms_to_radians,haversine_distance_with_altitude
+    count_unique, normalise_unique, shuffle!, has_any_nothing_fields, logistic_growth, normalise,dms_to_radians,haversine_distance_with_altitude,generate_bounds_from_vector,compute_index_with_in_bounds,split_camel_case
 
 
+    function generate_bounds_from_vector(vec)
+        @chain vec begin
+            cumsum(_)
+            [0,_]
+            reduce(vcat,_)
+            [(a, b) for (a, b) in zip(_[1:end-1], _[2:end])]
+        end
+    end
+
+    function compute_index_with_in_bounds(vec,element)
+        @chain vec begin
+            generate_bounds_from_vector(_)
+            findall(x -> element > x[1] && element <= x[2],_)
+            @aside @chain _ begin
+                @assert length(_) > 0 "Must have non-zero number of elements"
+            end
+            @aside @chain _ begin
+                @assert length(_) == 1 "Must have 1 element"
+            end
+            _[1]
+        end
+    end
+
+    function split_camel_case(input::String)::String
+        return replace(input, r"(?<=[a-z])(?=[A-Z])" => " ")
+    end
     
     function count_unique(a)
         m,M=extrema(a)
