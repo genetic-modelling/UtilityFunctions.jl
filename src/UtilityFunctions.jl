@@ -2,7 +2,7 @@ module UtilityFunctions
 
 # Write your package code here.
 export 
-    count_unique, normalise_unique, shuffle!, has_any_nothing_fields, logistic_growth, normalise
+    count_unique, normalise_unique, shuffle!, has_any_nothing_fields, logistic_growth, normalise,dms_to_radians,haversine_distance_with_altitude
 
 
     
@@ -50,4 +50,70 @@ export
     normalise(x) = (x .- minimum(x)) ./ (maximum(x) .- minimum(x))
 
 
+
+    function dms_to_radians(coord::String)
+        # Extract degrees, minutes, seconds, and direction using regular expressions
+        regex = r"(\d+)°(\d+)'([\d.]+)\"([NSWE])"
+        caps = match(regex, coord)
+        
+        if caps === nothing
+            error("Invalid format. Expected format: 26°49'50.2\"S")
+        end
+
+        # Parse the components
+        degrees = parse(Int, caps[1])
+        minutes = parse(Int, caps[2])
+        seconds = parse(Float64, caps[3])
+        direction = caps[4]
+
+        # Convert DMS to decimal degrees
+        decimal_degrees = degrees + minutes / 60 + seconds / 3600
+
+        # Apply the sign based on direction (S or W should be negative)
+        if direction in ["S", "W"]
+            decimal_degrees = -decimal_degrees
+        end
+
+        # Convert decimal degrees to radians
+        radians = decimal_degrees * π / 180
+
+        return radians
+    end
+
+
+    function haversine_distance_with_altitude(lat1::Float64, lon1::Float64, h1::Float64, lat2::Float64, lon2::Float64, h2::Float64)
+        # Convert degrees to radians
+        φ1 = lat1 * π / 180
+        φ2 = lat2 * π / 180
+        Δφ = (lat2 - lat1) * π / 180
+        Δλ = (lon2 - lon1) * π / 180
+
+        # Earth's radius in meters
+        R = 6371000.0
+
+        # Haversine formula for the horizontal distance
+        a = sin(Δφ / 2)^2 + cos(φ1) * cos(φ2) * sin(Δλ / 2)^2
+        c = 2 * atan(sqrt(a), sqrt(1 - a))
+        d_horizontal = R * c
+
+        # Calculate altitude difference
+        Δh = h2 - h1
+
+        # Calculate 3D distance
+        d_3D = sqrt(d_horizontal^2 + Δh^2)
+
+        return d_3D
+    end
+
+
+#= Example usage
+
+el_manantial = ("26°49'50.2\"S","65°16'59.4\"W")
+la_virginia =  ("26°45'07.8\"S","65°47'43.7\"W")
+
+rads_el_man = dms_to_radians.(el_manantial)
+rads_la_vir = dms_to_radians.(la_virginia)  
+
+haversine_distance_with_altitude(rads_el_man..., 495.0, rads_la_vir...,398.0)
+=#
 end
