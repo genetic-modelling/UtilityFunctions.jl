@@ -1,5 +1,7 @@
 module UtilityFunctions
 
+using Chain
+
 # Write your package code here.
 export 
     count_unique, normalise_unique, shuffle!, has_any_nothing_fields, logistic_growth, normalise,dms_to_radians,haversine_distance_with_altitude,generate_bounds_from_vector,compute_index_with_in_bounds,split_camel_case
