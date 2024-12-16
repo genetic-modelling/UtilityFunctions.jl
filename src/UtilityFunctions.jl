@@ -16,12 +16,18 @@ export
         end
     end
 
-    function compute_index_with_in_bounds(vec,element)
+   function compute_index_with_in_bounds(vec::Vector{Int},element::T) where T <: Number
+        @chain element begin
+            @assert _ ≥ 0 "Scalar value must be greater than zero, it is not."
+        end
         @chain vec begin
+            @aside @chain _ begin
+                @assert element ≤ sum(_) "Vector argument, vec, has a sum = $(sum(_)) which must be greater then the scalar, which is $(element), it is not."
+            end
             generate_bounds_from_vector(_)
             findall(x -> element > x[1] && element <= x[2],_)
             @aside @chain _ begin
-                @assert length(_) > 0 "Must have non-zero number of elements"
+                @assert length(_) > 0 "Scalar was not found with the tuples outputted from generate_bounds_from_vector. Thus the result is empty."
             end
             @aside @chain _ begin
                 @assert length(_) == 1 "Must have 1 element"
