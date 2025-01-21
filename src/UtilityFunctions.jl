@@ -8,6 +8,7 @@ export
 
 
 function generate_bounds_from_vector(vec)
+    @warn "This function has been moved to LifeStages.jl, take note of it being called and updated to LifeStages.jl"
     @chain vec begin
         cumsum(_)
         [0, _]
@@ -17,7 +18,9 @@ function generate_bounds_from_vector(vec)
 end
 
 function compute_index_with_in_bounds(vec::Vector{Int}, element::T) where {T<:Number}
+    @warn "This function has been moved to LifeStages.jl, take note of it being called and updated to LifeStages.jl"
     @chain element begin
+        @warn "This function has been moved to LifeStages.jl, take note of it being called and updated to LifeStages.jl"
         @assert _ ≥ 0 "Scalar value must be greater than zero, it is not."
     end
     @chain vec begin
