@@ -4,40 +4,7 @@ using Chain
 
 # Write your package code here.
 export
-    count_unique, normalise_unique, shuffle!, has_any_nothing_fields, logistic_growth, normalise, dms_to_radians, haversine_distance_with_altitude, generate_bounds_from_vector, compute_index_with_in_bounds, split_camel_case, find_non_zero_indices
-
-
-function generate_bounds_from_vector(vec)
-    @warn "This function has been moved to LifeStages.jl, take note of it being called and updated to LifeStages.jl"
-    @chain vec begin
-        cumsum(_)
-        [0, _]
-        reduce(vcat, _)
-        [(a, b) for (a, b) in zip(_[1:end-1], _[2:end])]
-    end
-end
-
-function compute_index_with_in_bounds(vec::Vector{Int}, element::T) where {T<:Number}
-    @warn "This function has been moved to LifeStages.jl, take note of it being called and updated to LifeStages.jl"
-    @chain element begin
-        @warn "This function has been moved to LifeStages.jl, take note of it being called and updated to LifeStages.jl"
-        @assert _ ≥ 0 "Scalar value must be greater than zero, it is not."
-    end
-    @chain vec begin
-        @aside @chain _ begin
-            @assert element ≤ sum(_) "Vector argument, vec, has a sum = $(sum(_)) which must be greater then the scalar, which is $(element), it is not."
-        end
-        generate_bounds_from_vector(_)
-        findall(x -> element > x[1] && element <= x[2], _)
-        @aside @chain _ begin
-            @assert length(_) > 0 "Scalar was not found with the tuples outputted from generate_bounds_from_vector. Thus the result is empty."
-        end
-        @aside @chain _ begin
-            @assert length(_) == 1 "Must have 1 element"
-        end
-        _[1]
-    end
-end
+    count_unique, normalise_unique, shuffle!, has_any_nothing_fields, logistic_growth, normalise, dms_to_radians, haversine_distance_with_altitude, split_camel_case, find_non_zero_indices, compute_genotype_HW_frequency
 
 function split_camel_case(input::String)::String
     return replace(input, r"(?<=[a-z])(?=[A-Z])" => " ")
@@ -177,6 +144,19 @@ function find_non_zero_indices(vec::Vector{Float64}; tol=1e-8)
     outcome
 
 end
+
+
+
+function compute_genotype_HW_frequency(dominant_allele_frequency::Float64)
+    recessive_allele_frequency = 1 - dominant_allele_frequency
+    weight_homozygous_dominant = dominant_allele_frequency^2
+    weight_heterozygous = 2 * dominant_allele_frequency * recessive_allele_frequency
+    weight_homozygous_recessive = recessive_allele_frequency^2
+    Dict(
+        "allele_frequency" => Dict("dominant" => dominant_allele_frequency, "recessive" => recessive_allele_frequency),
+        "genotype_frequency" => Dict("dominant" => weight_homozygous_dominant, "hetero" => weight_heterozygous, "recessive" => weight_homozygous_recessive))
+end
+
 end
 
 
